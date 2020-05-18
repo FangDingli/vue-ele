@@ -1,25 +1,38 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
+    <v-header :seller="seller"></v-header>
+    <header-detail :seller="seller"></header-detail>
   </div>
 </template>
 
 <script>
-
+// eslint-disable-next-line
+import VHeader from "components/v-header/v-header.vue"
+import headerDetail from 'components/header-detail/header-detail.vue'
+import {getSeller} from 'api'
 export default {
   name: 'App',
   components: {
-    
+    VHeader,
+    headerDetail,
+  },
+  data(){
+    return{
+      seller:{}
+    }
+  },
+  methods:{
+    _getSellerMethod(){
+      getSeller().then((seller)=>{
+        this.seller=seller
+      })
+    }
+  },
+  created(){
+    this._getSellerMethod()
   }
 }
 </script>
 
 <style lang="stylus">
-#app
-  font-family Avenir, Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
-  margin-top 60px
 </style>
