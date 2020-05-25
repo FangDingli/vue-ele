@@ -23,7 +23,7 @@ export default {
       const score=Math.floor(this.score*2)/2
       const hasDecimal=score % 1 !== 0
       const integer=Math.floor(score)
-      for (let i = 0; i < integer.length; i++) {
+      for (let i = 0; i < integer; i++) {
         result.push(CLS_ON)
       }
       if (hasDecimal) {
@@ -53,15 +53,15 @@ export default {
         height 20px
         margin-right 22px
         background-size 20px 20px
-          &:last-child
-            margin-right 0
-          &.on
-            bg-image("star48_on")
-          &.half
-            bg-image("star48_half")
-          &.off
-            bg-image("star48_off")
-    &star-36
+        &:last-child
+          margin-right 0
+        &.on
+          bg-image("star48_on")
+        &.half
+          bg-image("star48_half")
+        &.off
+          bg-image("star48_off")
+    &.star-36
       .star-item
         width 15px
         height 15px
@@ -75,7 +75,7 @@ export default {
             bg-image("star36_half")
           &.off
             bg-image("star36_off")
-    &star-24
+    &.star-24
       .star-item
         width 10px
         height 10px

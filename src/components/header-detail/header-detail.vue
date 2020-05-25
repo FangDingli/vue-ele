@@ -1,45 +1,57 @@
 <template>
-  <div class="header-detail">
-    <div class="detail-wrapper clear-fix">
-      <div class="detail-main">
-        <h1 class="name">{{seller.name}}</h1>
-        <div class="star-wrapper">
-          <star :size="48" :score="seller.score"></star>
-        </div>
-        <div class="title">
-          <div class="line"></div>
-          <div class="text">优惠信息</div>
-          <div class="line"></div>
-        </div>
-        <ul class="supports" v-if="seller.supports">
-          <li class="support-item" v-for="(item,index) in seller.supports" :key="item.id">
-            <support-icon :size=2 :type="seller.supports[index].type"></support-icon>
-            <span class="text">{{seller.supports[index].description}}</span>
-          </li>
-        </ul>
-        <div class="title">
-          <div class="line"></div>
-          <div class="text">商家公告</div>
-          <div class="line"></div>
-        </div>
-        <div class="bulletin">
-          <p class="content">{{seller.bulletin}}</p>
+  <transition name="fade">
+    <div class="header-detail" v-show="visible">
+      <div class="detail-wrapper clear-fix">
+        <div class="detail-main">
+          <h1 class="name">{{seller.name}}</h1>
+          <div class="star-wrapper">
+            <star :size="48" :score="seller.score"></star>
+          </div>
+          <div class="title">
+            <div class="line"></div>
+            <div class="text">优惠信息</div>
+            <div class="line"></div>
+          </div>
+          <ul class="supports" v-if="seller.supports">
+            <li class="support-item" v-for="(item,index) in seller.supports" :key="item.id">
+              <support-icon :size=2 :type="seller.supports[index].type"></support-icon>
+              <span class="text">{{seller.supports[index].description}}</span>
+            </li>
+          </ul>
+          <div class="title">
+            <div class="line"></div>
+            <div class="text">商家公告</div>
+            <div class="line"></div>
+          </div>
+          <div class="bulletin">
+            <p class="content">{{seller.bulletin}}</p>
+          </div>
         </div>
       </div>
+      <div class="detail-close">
+        <i class="icon-close" @click="hide"></i>
+      </div>
     </div>
-    <div class="detail-close">
-      <i class="icon-close"></i>
-    </div>
-  </div>
+  </transition>
 </template>
 
 <script>
 import star from 'components/star/star.vue'
 import supportIcon from 'components/support-icon/support-icon.vue'
 export default {
-  name:"",
+  name:"HeaderDetail",
   data:function () {
-    return {}
+    return {
+      visible:false
+    }
+  },
+  methods:{
+    show(){
+      this.visible=true
+    },
+    hide(){
+      this.visible=false
+    }
   },
   props:{
     seller:{
@@ -73,7 +85,7 @@ export default {
     color $color-white
     background-color $color-background-s
     &.fade-enter-active, &.fade-leave-active
-      transition all 0.5s ease
+      transition all 1s ease
     &.fade-enter, &.fade-leave-active
       opacity 0
       background-color $color-background
