@@ -2,76 +2,81 @@
   <div id="app">
     <v-header :seller="seller"></v-header>
     <div class="tab-wrapper">
-      <tab :tab="tab" :initSlideIndex=0></tab>
+      <tab :tab="tab" :initSlideIndex="0"></tab>
     </div>
   </div>
 </template>
 
 <script>
 // eslint-disable-next-line
-import VHeader from "components/v-header/v-header.vue"
+import VHeader from 'components/v-header/v-header.vue'
 import Tab from 'components/tab/tab.vue'
-import {getSeller} from 'api'
+import { getSeller } from 'api'
 import Seller from 'components/seller/seller.vue'
 import Goods from 'components/goods/goods.vue'
 import Ratings from 'components/ratings/ratings.vue'
+import qs from 'query-string'
 export default {
   name: 'App',
   components: {
     VHeader,
-    Tab
+    Tab,
   },
-  data(){
-    return{
-      seller:{}
+  data() {
+    return {
+      seller: {
+        id: qs.parse(location.search).id,
+      },
     }
   },
-  computed:{
-    tab(){
+  computed: {
+    tab() {
       return [
         {
-          label:"商品",
-          component:Goods,
-          data:{
-            seller:this.seller
-          }
+          label: '商品',
+          component: Goods,
+          data: {
+            seller: this.seller,
+          },
         },
         {
-          label:"评论",
-          component:Ratings,
-          data:{
-            seller:this.seller
-          }
+          label: '评论',
+          component: Ratings,
+          data: {
+            seller: this.seller,
+          },
         },
         {
-          label:"商家",
-          component:Seller,
-          data:{
-            seller:this.seller
-          }
+          label: '商家',
+          component: Seller,
+          data: {
+            seller: this.seller,
+          },
         },
       ]
-    }
+    },
   },
-  methods:{
-    _getSellerMethod(){
-      getSeller().then((seller)=>{
-        this.seller=seller
+  methods: {
+    _getSellerMethod() {
+      getSeller({
+        id: this.seller.id,
+      }).then(seller => {
+        this.seller = Object.assign({}, this.seller, seller)
       })
-    }
+    },
   },
-  created(){
+  created() {
     this._getSellerMethod()
-  }
+  },
 }
 </script>
 
 <style lang="stylus" scoped>
-  #app
-    .tab-wrapper
-      position fixed
-      top 136px
-      left 0
-      right 0
-      bottom 0
+#app
+  .tab-wrapper
+    position fixed
+    top 136px
+    left 0
+    right 0
+    bottom 0
 </style>

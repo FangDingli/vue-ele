@@ -32,6 +32,7 @@ module.exports={
   },
 
   css: {
+    sourceMap:true,
     loaderOptions: {
       stylus: {
         'resolve url': true,

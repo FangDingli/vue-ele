@@ -20,7 +20,7 @@
       @scroll="slideScroll"
       >
         <cube-slide-item v-for="(tab, index) in tab" :key="index">
-          <component :is="tab.component" :data="tab.data"></component>
+          <component :is="tab.component" :data="tab.data" ref="slideComp"></component>
         </cube-slide-item>
       </cube-slide>
     </div>
@@ -65,9 +65,15 @@ export default {
       }
     }
   },
+  mounted(){
+    this.slideChange(this.index)
+  },
   methods:{
     slideChange(slideIndex){
       this.index=slideIndex
+      const currentComp=this.$refs.slideComp[slideIndex]
+      //console.log(this.$refs.slideComp[slideIndex].$options.name)
+      currentComp.getCurrentData&&currentComp.getCurrentData()
     },
     slideScroll(obj){
       const tabWidth=this.$refs.tabbar.$el.clientWidth

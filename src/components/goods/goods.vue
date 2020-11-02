@@ -1,13 +1,336 @@
 <template>
-  <div>goods</div>
+  <div class="goods">
+    <div class="scroll-nav-wrapper">
+      <cube-scroll-nav :side="true" :data="goods" :options="scrollOptions" v-if="goods.length">
+        <template slot="bar" slot-scope="props">
+          <cube-scroll-nav-bar
+            direction="vertical"
+            :current="props.current"
+            :labels="props.labels"
+            :txts="barText"
+          >
+            <template slot-scope="props">
+              <div class="text">
+                <support-icon v-if="props.txt.type >= 1" :size="3" :type="props.txt.type">
+                </support-icon>
+                <span>{{ props.txt.name }}</span>
+                <span class="num" v-if="props.txt.count">
+                  <bubble :num="props.txt.count"></bubble>
+                </span>
+              </div>
+            </template>
+          </cube-scroll-nav-bar>
+        </template>
+        <cube-scroll-nav-panel
+          v-for="good in goods"
+          :key="good.name"
+          :label="good.name"
+          :title="good.name"
+        >
+          <ul>
+            <li
+              v-for="food in good.foods"
+              :key="food.name"
+              @click="foodClick(food)"
+              class="food-item"
+            >
+              <div class="icon">
+                <img :src="food.icon" width="57" height="57" alt="" />
+              </div>
+              <div class="content">
+                <h2 class="name">{{ food.name }}</h2>
+                <p class="desc">{{ food.description }}</p>
+                <div class="extra">
+                  <span class="count">月售{{ food.sellCount }}</span>
+                  <span>好评率{{ food.rating }}%</span>
+                </div>
+                <div class="price">
+                  <span class="now">￥{{ food.price }}</span>
+                  <span class="old" v-show="food.oldPrice">￥{{ food.oldPrice }}</span>
+                </div>
+              </div>
+              <div class="cart-control-wrapper">
+                <CartControl @ball_anim_trigger="onAdd" :food="food"></CartControl>
+              </div>
+            </li>
+          </ul>
+        </cube-scroll-nav-panel>
+      </cube-scroll-nav>
+    </div>
+    <div class="shop-cart-wrapper">
+      <shop-cart
+        ref="shopCart"
+        :selected-foods="selectedFoods"
+        :min-price="seller.minPrice"
+        :delivery-price="seller.deliveryPrice"
+      ></shop-cart>
+    </div>
+  </div>
 </template>
 
 <script>
+import { getGoods } from 'api'
+import ShopCart from 'components/shop-cart/shop-cart'
+import CartControl from 'components/cart-control/cart-control'
+import supportIcon from 'components/support-icon/support-icon'
+import bubble from 'components/bubble/bubble'
+import Food from 'components/food/food'
 export default {
-  name:"goods"
+  name: 'goods',
+  props: {
+    data: {
+      type: Object,
+      default() {
+        return {
+          fetched: false,
+        }
+      },
+    },
+  },
+  data() {
+    return {
+      goods: [],
+      scrollOptions: {
+        click: false,
+        directionLockThreshold: 0,
+      },
+      clickedFood: {},
+    }
+  },
+  methods: {
+    getCurrentData() {
+      if (!this.fetched) {
+        this.fetched = true
+        getGoods({ id: this.seller.id }).then(goods => {
+          this.goods = goods
+        })
+      }
+    },
+    onAdd(el) {
+      this.$refs.shopCart.ballFallAnim(el)
+    },
+    foodClick(food) {
+      this.clickedFood = food
+      this._showFood()
+      this._showShopCartSticky()
+    },
+    _showFood() {
+      this.foodComp =
+        this.foodComp ||
+        this.$createFood({
+          $props: {
+            food: 'clickedFood',
+          },
+          $events: {
+            leave: () => {
+              this._hideShopCartSticky()
+            },
+            ball_anim_trigger: e => {
+              this.shopCartStickyComp.ballFallAnim(e)
+            },
+          },
+        })
+      this.foodComp.show()
+    },
+    _showShopCartSticky() {
+      this.shopCartStickyComp =
+        this.shopCartStickyComp ||
+        this.$createShopCartSticky({
+          $props: {
+            selectedFoods: 'selectedFoods',
+            minPrice: this.seller.minPrice,
+            deliveryPrice: this.seller.deliveryPrice,
+          },
+        })
+      this.shopCartStickyComp.show()
+    },
+    _hideShopCartSticky() {
+      this.shopCartStickyComp.hide()
+    },
+  },
+  computed: {
+    seller() {
+      return this.data.seller
+    },
+    selectedFoods() {
+      let selectedFoods = []
+      this.goods.forEach(goodItem => {
+        goodItem.foods.forEach(foodItem => {
+          if (foodItem.count) {
+            selectedFoods.push(foodItem)
+          }
+        })
+      })
+      return selectedFoods
+    },
+    barText() {
+      let ret = []
+      this.goods.forEach(element => {
+        const { name, type, foods } = element
+        let count = 0
+        foods.forEach(element => {
+          count += element.count || 0
+        })
+        ret.push({ type, name, count })
+      })
+      return ret
+    },
+  },
+  components: {
+    ShopCart,
+    CartControl,
+    supportIcon,
+    bubble,
+    Food,
+  },
 }
 </script>
 
-<style>
+<style lang="stylus" scoped>
+@import '~common/stylus/mixin.styl';
+@import '~common/stylus/variable.styl';
 
+.goods {
+  position: relative;
+  height: 100%;
+
+  .scroll-nav-wrapper {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    bottom: 48px;
+  }
+
+  >>>.cube-scroll-nav-bar {
+    width: 80px;
+    white-space: normal;
+    overflow: hidden;
+  }
+
+  >>>.cube-scroll-nav-bar-item {
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    line-height: 14px;
+    font-size: $fontsize-small;
+    background-color: $color-background-ssss;
+
+    .text {
+      flex: 1;
+      position: relative;
+    }
+
+    .num {
+      position: absolute;
+      right: -8px;
+      top: -10px;
+    }
+
+    .support-icon {
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 4px;
+    }
+  }
+
+  >>>.cube-scroll-nav-bar-item_active {
+    background-color: $color-white;
+    color: $color-dark-grey;
+  }
+
+  >>>.cube-scroll-nav-panel-title {
+    padding-left: 14px;
+    height: 26px;
+    line-height: 26px;
+    border-left: 2px solid $color-col-line;
+    font-size: $fontsize-small;
+    color: $color-grey;
+    background-color: $color-background-ssss;
+  }
+
+  .food-item {
+    display: flex;
+    margin: 18px;
+    padding-bottom: 18px;
+    position: relative;
+
+    &:last-child {
+      border-none();
+      margin-bottom: 0;
+    }
+
+    .icon {
+      flex: 0 0 57px;
+      margin-right: 10px;
+
+      img {
+        height: auto;
+      }
+    }
+
+    .content {
+      flex: 1;
+
+      .name {
+        margin: 2px 0 8px 0;
+        height: 14px;
+        line-height: 14px;
+        font-size: $fontsize-medium;
+        color: $color-dark-grey;
+      }
+
+      .desc,
+      .extra {
+        line-height: 10px;
+        font-size: $fontsize-small-s;
+        color: $color-light-grey;
+      }
+
+      .desc {
+        line-height: 12px;
+        margin-bottom: 8px;
+      }
+
+      .extra {
+        .count {
+          margin-right: 12px;
+        }
+      }
+
+      .price {
+        font-weight: 700;
+        line-height: 24px;
+
+        .now {
+          margin-right: 8px;
+          font-size: $fontsize-medium;
+          color: $color-red;
+        }
+
+        .old {
+          text-decoration: line-through;
+          font-size: $fontsize-small-s;
+          color: $color-light-grey;
+        }
+      }
+    }
+
+    .cart-control-wrapper {
+      position: absolute;
+      right: 0;
+      bottom: 12px;
+    }
+  }
+
+  .shop-cart-wrapper {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    width: 100%;
+    height: 48px;
+  }
+}
 </style>
