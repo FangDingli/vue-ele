@@ -3,7 +3,7 @@ const ERR_OK = 0
 
 const urlMap = {
   development: '/',
-  production: 'http://8.136.112.243/'
+  production: 'http://8.136.112.243/ele/'
 }
 const baseUrl = urlMap[process.env.NODE_ENV]
 
